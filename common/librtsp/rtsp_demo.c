@@ -136,10 +136,10 @@ struct rtsp_client_connection
 #define RTSP_CC_STATE_PLAYING	2
 #define RTSP_CC_STATE_RECORDING	3
 
-	SOCKET sockfd;		//rtsp client socket
-	struct in_addr peer_addr; //peer ipv4 addr
-	unsigned int   peer_port; //peer ipv4 port
-	unsigned long session_id;	//session id
+	SOCKET		sockfd;		//rtsp client socket
+	struct in_addr	peer_addr;	//peer ipv4 addr
+	uint32_t	peer_port;	//peer ipv4 port
+	uint32_t	session_id;	//session id
 
 	char reqbuf[RTSP_REQBUF_MAX_SIZ];
 	int  reqlen;
@@ -1179,8 +1179,14 @@ static int rtsp_process_request (struct rtsp_client_connection *cc, const rtsp_m
 	rtsp_msg_set_cseq(resmsg, cseq);
 
 	if (cc->state != RTSP_CC_STATE_INIT) {
-		if (rtsp_msg_get_session(reqmsg, &session) < 0 || session != cc->session_id) {
-			warn("Invalid Session field\n");
+		if (rtsp_msg_get_session(reqmsg, &session) < 0) {
+			warn("No Session field\n");
+			rtsp_msg_set_response(resmsg, 400);
+			return 0;
+		}
+		if (session != cc->session_id) {
+			warn("Invalid Session field,　"
+			     "session:%08X, cc->session:%08X\n", session, cc->session_id);
 			rtsp_msg_set_response(resmsg, 454);
 			return 0;
 		}
