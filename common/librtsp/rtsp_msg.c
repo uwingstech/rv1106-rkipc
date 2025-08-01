@@ -538,8 +538,15 @@ static int rtsp_msg_parse_##_name(rtsp_msg_s *msg, const char *line) \
 	if (!p) goto fail; \
 	p++; \
 	char *endptr; \
-	long val = strtol(p, &endptr, _base); \
-	if (p == endptr || val < 0) goto fail; \
+	uint32_t val = 0; \
+	if (_base == 16) { \
+	  val = strtoul(p, &endptr, _base); \
+	} else { \
+	  long t = strtol(p, &endptr, _base); \
+	  if (t < 0 ) goto fail; \
+	  val = (uint32_t)t; \
+	} \
+	if (p == endptr ) goto fail; \
 	rtsp_mem_free(hdrs->_name); \
 	hdrs->_name = (_type*)rtsp_mem_alloc(sizeof(_type)); \
 	if (!hdrs->_name) { \
@@ -559,6 +566,40 @@ static int rtsp_msg_build_##_name(const rtsp_msg_s *msg, char *line, size_t size
 	} \
 	return 0; \
 }
+
+#if 0 // for kunyi debugging
+static int rtsp_msg_parse_session(rtsp_msg_s *msg, const char *line)
+{
+	rtsp_msg_hdr_s *hdrs = &msg->hdrs;
+	const char *p = strchr(line, ':');;
+
+	if (!p) goto fail;
+	p++;
+	char *endptr;
+	uint32_t val = strtoul(p, &endptr, 16);
+	if (p == endptr) goto fail;
+
+	rtsp_mem_free(hdrs->session);
+	hdrs->session = (rtsp_msg_session_s*)rtsp_mem_alloc(sizeof(rtsp_msg_session_s));
+	if (!hdrs->session) {
+		err("rtsp_mem_alloc for %s failed\n", "rtsp_msg_session_s");
+		return -1;
+	}
+	hdrs->session->session = val;
+	return 0;
+fail:
+	err("parse %s failed. line: %s\n", "rtsp_msg_session_s", line);
+	return -1;
+}
+
+static int rtsp_msg_build_session(const rtsp_msg_s *msg, char *line, size_t size)
+{
+	if (msg->hdrs.session) {
+		return snprintf(line, size, "Session: %08X\r\n", msg->hdrs.session->session); \
+	}
+	return 0;
+}
+#endif
 
 DEFINE_PARSE_BUILD_LIKE_CSEQ(cseq, rtsp_msg_cseq_s, cseq, "CSeq: %u", 10)
 DEFINE_PARSE_BUILD_LIKE_CSEQ(session, rtsp_msg_session_s, session, "Session: %08X", 16)
