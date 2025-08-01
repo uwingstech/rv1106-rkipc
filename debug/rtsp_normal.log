@@ -1,0 +1,372 @@
+[root@uwings ]# rkipc -a /oem/usr/share/iqfiles &
+[root@uwings ]# [common.c][rkipc_version_dump]:rkipc version: git-b9ab717 Fri Aug 1 08:25:23 2025 +0800
+[common.c][rkipc_version_dump]:rkipc info: built time: 2025-08-01 10:47:34
+[common.c][rkipc_version_dump]:rkipc type: COMPILE_FOR_RV1106_IPC
+[rkipc.c][main]:rkipc_ini_path_ is (null), rkipc_iq_file_path_ is /oem/usr/share/iqfiles, rkipc_log_level is 2
+[param.c][rk_param_init]:g_ini_path_ is /userdata/rkipc.ini
+[isp.c][rk_isp_init]:g_iq_file_dir_ is /oem/usr/share/iqfiles
+[isp.c][rk_isp_init]:cam_id is 0, hdr_mode is close, scenario is normal
+rkaiq log level ff1
+[network.c][ntp_client_thread]:refresh_time_s is 60, ntp_server is 119.28.183.184
+[network.c][rk_net_proc]:Creat rk_net_proc thread!
+XCORE:K:rk_aiq_init_lib, ISP HW ver: 32
+XCORE:K:
+************************** VERSION INFOS **************************
+version release date: 2024-2-18
+         AIQ:       AIQ v5.0x5.0
+
+git logs:
+25bd14e RV1106: smart_door: release rga/isp/mpp for V1.3.0
+99d080a RV1106/RV1103: Battery/Doorbell: release kmpp/rockit-ko for V1.3.2
+6458e2a RV1106/RV1103: Battery/Doorbell: release kmpp/rockit-ko for V1.3.1
+e8dab39 RV1106: CVR: release rga/isp/mpp for V1.1.0
+a021b32 RV1106/RV1103: Battery/Doorbell: release kmpp/rockit-ko for V1.3.0
+
+************************ VERSION INFOS END ************************
+
+[isp.c][sample_common_isp_init]:ID: 0, sensor_name is m00_b_sc3336 4-0030, iqfiles is /oem/usr/share/iqfiles
+XCORE:K:rk_aiq_uapi_sysctl_preInit_devBufCnt: dev_ent:rkraw_rx, buf_cnt:2
+[isp.c][sample_common_isp_init]:main_scene is normal, sub_scene is day
+[isp.c][sample_common_isp_init]:01:30:42.860057: rk_aiq_uapi2_sysctl_preInit_scene begin
+XCORE:K:rk_aiq_uapi_sysctl_preInit_scene: main_scene: normal, sub_scene: day
+[isp.c][sample_common_isp_init]:01:30:42.863378: rk_aiq_uapi2_sysctl_preInit_scene over
+XCORE:E:invalid main scene len!
+
+IPCSERVER:K:cid[0] Process path:/tmp/UNIX.domain0, sockfd:14
+XCORE:K:cid[0] rk_aiq_uapi_sysctl_init success. iq:/oem/usr/share/iqfiles/sc3336_CMK-OT2119-PC1_30IRC-F16.json
+[isp.c][sample_common_isp_init]:01:30:43.030440: rk_aiq_uapi2_sysctl_init over
+CAMHW:E:failed to set hdr mode 0
+XCORE:K:cid[0] rk_aiq_uapi_sysctl_prepare success. mode:0
+[isp.c][sample_common_isp_run]:01:30:43.044472: rk_aiq_uapi2_sysctl_prepare succeed
+CAMHW:K:cid[0] start success. isGroup:0, isOnline:1, isMultiIsp:0, init_ens:0x1bfc0ffc4739
+XCORE:K:cid[0] rk_aiq_uapi_sysctl_start success.
+[isp.c][sample_common_isp_run]:01:30:43.052166: rk_aiq_uapi2_sysctl_start succeed
+failed to open /sys/class/pwm/pwmchip3/export
+[isp.c][rk_isp_set_light_strength]:pwm3 init failed -2
+[isp.c][rk_isp_set_blc_strength]:blc mode is not enabled
+[isp.c][rk_isp_set_hlc_level]:hlc mode is not enabled
+[isp.c][rk_isp_set_white_blance_red]:white blance is auto, not support set gain
+[isp.c][rk_isp_set_white_blance_green]:white blance is auto, not support set gain
+[isp.c][rk_isp_set_white_blance_blue]:white blance is auto, not support set gain
+ALDCH:E:uapi want to disalbe ldch, but ldch has been disalbed!
+ALDCH:E:uapi want to disalbe ldch, but ldch has been disalbed!
+rockit log path (null), log_size = 0, can use export rt_log_path=, export rt_log_size= change
+log_file = (nil)
+RTVersion        01:30:43-172 {dump              :064} ---------------------------------------------------------
+RTVersion        01:30:43-174 {dump              :065} rockit version: git-4720dc10a Tue Apr 30 15:47:55 2024 +0800
+RTVersion        01:30:43-174 {dump              :066} rockit building: built- 2024-04-30 15:53:43
+RTVersion        01:30:43-174 {dump              :067} ---------------------------------------------------------
+(null)           01:30:43-174 {log_level_init    :207}
+
+ please use echo name=level > /tmp/rt_log_level set log level
+	name: all cmpi mb sys vdec venc rgn vpss vgs tde avs wbc vo vi ai ao aenc adec
+	log_level: 0 1 2 3 4 5 6
+
+rockit default level 4, can use export rt_log_level=x, x=0,1,2,3,4,5,6 change
+(null)           01:30:43-176 {read_log_level    :098} text is all=4
+(null)           01:30:43-176 {read_log_level    :100} module is all, log_level is 4
+[video.c][rk_video_init]:enable_jpeg is 1, enable_venc_0 is 1, enable_venc_1 is 1, enable_rtsp is 1, enable_rtmp is 0
+(null)           01:30:43-185 {monitor_log_level :149} #Start monitor_log_level thread, arg:(nil)
+RKViDev          01:30:43-186 {vi_set_dev_attr   :612} VI_DEV_ATTR_S all parameter reserved
+RTIsp3x          01:30:43-189 {ispInitDevice     :591} sensor name = m00_b_sc3336 4-0030
+RTDeviceSensorV4 01:30:43-214 {ispOpenDevice     :502} v4l2_open(/dev/video0), handler=46
+RTDeviceSensorV4 01:30:43-214 {ispOpenDevice     :502} v4l2_open(/dev/v4l-subdev2), handler=48
+RTDeviceSensorV4 01:30:43-215 {close             :112} do RTDeviceSensorV4L2 close
+RTDeviceSensorV4 01:30:43-215 {close             :112} do RTDeviceSensorV4L2 close
+[INFO  rtsp_demo.c:280:rtsp_new_demo] rtsp server demo starting on port 554
+[DEBUG rtsp_demo.c:480:rtsp_new_session] add session path: /live/0
+rtsp streamq_alloc size is 1753484
+rtsp streamq_alloc size is 59884
+[DEBUG rtsp_demo.c:480:rtsp_new_session] add session path: /live/1
+rtsp streamq_alloc size is 1753484
+rtsp streamq_alloc size is 59884
+RKViChn          01:30:43-216 {prepareRuntime    :354} ---------------------------------------------------------
+RKViChn          01:30:43-216 {prepareRuntime    :356} vi version: 1.22, name:vvi
+RKViChn          01:30:43-216 {prepareRuntime    :357} rockit-ko version: vmpi:28ee389dbc33
+RKViChn          01:30:43-216 {prepareRuntime    :358} rockit-ko building: -2024-05-24-18:15:06
+RKViChn          01:30:43-216 {prepareRuntime    :359} ---------------------------------------------------------
+cmpi             01:30:43-216 {prepareRuntime    :378} mb pool create success, MBCnt= 2
+RTIsp3x          01:30:43-217 {ispInitDevice     :591} sensor name = m00_b_sc3336 4-0030
+cmpi             01:30:43-219 {createRuntime     :634} >>>>>>>>> Sensor link info dump: <<<<<<<<<
+cmpi             01:30:43-219 {createRuntime     :636} 	 vicap media name           : /dev/media0
+cmpi             01:30:43-219 {createRuntime     :637} 	 vicap model name           : rkcif-mipi-lvds
+cmpi             01:30:43-219 {createRuntime     :638} 	 camera id                  : 0
+cmpi             01:30:43-219 {createRuntime     :639} 	 sensor name                : m00_b_sc3336 4-0030
+cmpi             01:30:43-219 {createRuntime     :641} 	 stream_cif_mipi_id0 video name: /dev/video0
+cmpi             01:30:43-219 {createRuntime     :642} 	 stream_cif_mipi_id1 video name: /dev/video1
+cmpi             01:30:43-219 {createRuntime     :643} 	 stream_cif_mipi_id2 video name: /dev/video2
+cmpi             01:30:43-219 {createRuntime     :644} 	 stream_cif_mipi_id3 video name: /dev/video3
+cmpi             01:30:43-219 {createRuntime     :646} 	 sensor raw width           : 2304
+cmpi             01:30:43-219 {createRuntime     :647} 	 sensor raw height          : 1296
+cmpi             01:30:43-219 {createRuntime     :648} ---------------------------------------------------------
+cmpi             01:30:43-219 {createRuntime     :654} 	 isp media name           : /dev/media1
+cmpi             01:30:43-219 {createRuntime     :655} 	 isp model name           : rkisp0
+cmpi             01:30:43-219 {createRuntime     :656} 	 isp driver name          : rkisp-vir0
+cmpi             01:30:43-219 {createRuntime     :657} 	 isp dev name             : /dev/v4l-subdev3
+cmpi             01:30:43-219 {createRuntime     :659} 	 isp rawrd0_m_path        : /dev/video18
+cmpi             01:30:43-219 {createRuntime     :660} 	 isp rawrd1_l_path        :
+cmpi             01:30:43-219 {createRuntime     :661} 	 isp rawrd2_s_path        : /dev/video19
+cmpi             01:30:43-219 {createRuntime     :664} 	 mainpath video name      : /dev/video11
+cmpi             01:30:43-219 {createRuntime     :665} 	 selfpath video name      : /dev/video12
+cmpi             01:30:43-219 {createRuntime     :666} 	 bypasspath video name    : /dev/video14
+cmpi             01:30:43-219 {createRuntime     :667} 	 sensor link type         : 2
+cmpi             01:30:43-219 {createRuntime     :668} 	 sensor is united         : 0
+cmpi             01:30:43-220 {createRuntime     :672} ---------------------------------------------------------
+cmpi             01:30:43-220 {createRuntime     :711} [non-WRAP MODE]: buff size = 1382400
+RTIsp3x          01:30:43-224 {ispInitDevice     :591} sensor name = m00_b_sc3336 4-0030
+RTDeviceV4L2     01:30:43-245 {open              :137} cameraIndex:0, entityName:rkisp_mainpath
+RTDeviceV4L2     01:30:43-245 {open              :143} open video name(/dev/video11)
+RKViChn          01:30:43-246 {setFrameRate      :1469} [vi] dev(0) ch(0) illegal param s32SrcFrameRate(0) s32DstFrameRate(0)
+RTDeviceV4L2     01:30:43-247 {ispCameraInfo     :567} current device:/dev/video11 isn't compatible(cap:0x84201000) device,memoryType:4, retry:0
+RTDeviceV4L2     01:30:43-248 {ispInitFormat     :767} ioctl VIDIOC_S_FMT OK
+cmpi             01:30:43-249 {start             :1093} =========== vi Start startRuntime ===========
+RTDeviceV4L2     01:30:43-250 {ispStreamOn       :458} do ispStreamOn start
+CAMHW:K:camId:0, notify_isp_stream_status on
+RTDeviceV4L2     01:30:43-291 {ispStreamOn       :511} do ispStreamOn done
+[video.c][rk_video_set_frame_rate]:num is 25, den is 1
+[video.c][rk_video_set_frame_rate]:old VI framerate is [-1:-1]
+[video.c][rk_video_set_frame_rate]:new VI framerate is [25:25]
+[video.c][rk_video_set_frame_rate]:new VENC framerate is [25:25]
+RKVencChannel    01:30:43-298 {setH265CuDqp      :4003} pstCuDqp illegal param: u32CuDqp 3486226(expects range [0, 2])
+RKVencChannel    01:30:43-300 {setH265CuDqp      :4003} pstCuDqp illegal param: u32CuDqp -6(expects range [0, 2])
+MpiAdapterEncode 01:30:43-301 {ma_encode_create  :1743} ringbuf buf_size 462848
+MpiAdapterEncode 01:30:43-309 {ma_encode_create  :1782} mem_fd = 54
+RKViChn          01:30:43-314 {prepareRuntime    :354} ---------------------------------------------------------
+RKViChn          01:30:43-315 {prepareRuntime    :356} vi version: 1.22, name:vvi
+RKViChn          01:30:43-315 {prepareRuntime    :357} rockit-ko version: vmpi:28ee389dbc33
+RKViChn          01:30:43-315 {prepareRuntime    :358} rockit-ko building: -2024-05-24-18:15:06
+RKViChn          01:30:43-315 {prepareRuntime    :359} ---------------------------------------------------------
+cmpi             01:30:43-315 {prepareRuntime    :378} mb pool create success, MBCnt= 2
+RTIsp3x          01:30:43-317 {ispInitDevice     :591} sensor name = m00_b_sc3336 4-0030
+cmpi             01:30:43-320 {createRuntime     :634} >>>>>>>>> Sensor link info dump: <<<<<<<<<
+cmpi             01:30:43-320 {createRuntime     :636} 	 vicap media name           : /dev/media0
+cmpi             01:30:43-320 {createRuntime     :637} 	 vicap model name           : rkcif-mipi-lvds
+cmpi             01:30:43-320 {createRuntime     :638} 	 camera id                  : 0
+cmpi             01:30:43-321 {createRuntime     :639} 	 sensor name                : m00_b_sc3336 4-0030
+cmpi             01:30:43-321 {createRuntime     :641} 	 stream_cif_mipi_id0 video name: /dev/video0
+cmpi             01:30:43-321 {createRuntime     :642} 	 stream_cif_mipi_id1 video name: /dev/video1
+cmpi             01:30:43-321 {createRuntime     :643} 	 stream_cif_mipi_id2 video name: /dev/video2
+cmpi             01:30:43-321 {createRuntime     :644} 	 stream_cif_mipi_id3 video name: /dev/video3
+cmpi             01:30:43-321 {createRuntime     :646} 	 sensor raw width           : 2304
+cmpi             01:30:43-322 {createRuntime     :647} 	 sensor raw height          : 1296
+cmpi             01:30:43-322 {createRuntime     :648} ---------------------------------------------------------
+cmpi             01:30:43-322 {createRuntime     :654} 	 isp media name           : /dev/media1
+cmpi             01:30:43-322 {createRuntime     :655} 	 isp model name           : rkisp0
+cmpi             01:30:43-322 {createRuntime     :656} 	 isp driver name          : rkisp-vir0
+cmpi             01:30:43-322 {createRuntime     :657} 	 isp dev name             : /dev/v4l-subdev3
+cmpi             01:30:43-324 {createRuntime     :659} 	 isp rawrd0_m_path        : /dev/video18
+cmpi             01:30:43-324 {createRuntime     :660} 	 isp rawrd1_l_path        :
+cmpi             01:30:43-324 {createRuntime     :661} 	 isp rawrd2_s_path        : /dev/video19
+cmpi             01:30:43-324 {createRuntime     :664} 	 mainpath video name      : /dev/video11
+cmpi             01:30:43-324 {createRuntime     :665} 	 selfpath video name      : /dev/video12
+cmpi             01:30:43-324 {createRuntime     :666} 	 bypasspath video name    : /dev/video14
+cmpi             01:30:43-324 {createRuntime     :667} 	 sensor link type         : 2
+cmpi             01:30:43-325 {createRuntime     :668} 	 sensor is united         : 0
+cmpi             01:30:43-325 {createRuntime     :672} ---------------------------------------------------------
+cmpi             01:30:43-325 {createRuntime     :711} [non-WRAP MODE]: buff size = 608256
+MpiAdapterEncode 01:30:43-332 {ma_encode_get_pack:2079} map ptr: 0xa441b000, fd 57
+[DEBUG utils.c:186:rtsp_codec_data_parse_from_user_h265] vps 23
+[DEBUG utils.c:194:rtsp_codec_data_parse_from_user_h265] sps 44
+[DEBUG utils.c:202:rtsp_codec_data_parse_from_user_h265] pps 9
+RTIsp3x          01:30:43-336 {ispInitDevice     :591} sensor name = m00_b_sc3336 4-0030
+RTDeviceV4L2     01:30:43-339 {open              :137} cameraIndex:0, entityName:rkisp_selfpath
+RTDeviceV4L2     01:30:43-339 {open              :143} open video name(/dev/video12)
+RKViChn          01:30:43-340 {setFrameRate      :1469} [vi] dev(0) ch(1) illegal param s32SrcFrameRate(0) s32DstFrameRate(0)
+RTDeviceV4L2     01:30:43-340 {ispCameraInfo     :567} current device:/dev/video12 isn't compatible(cap:0x84201000) device,memoryType:4, retry:0
+RTDeviceV4L2     01:30:43-341 {ispInitFormat     :767} ioctl VIDIOC_S_FMT OK
+cmpi             01:30:43-341 {start             :1093} =========== vi Start startRuntime ===========
+RTDeviceV4L2     01:30:43-341 {ispStreamOn       :458} do ispStreamOn start
+RTDeviceV4L2     01:30:43-342 {ispStreamOn       :511} do ispStreamOn done
+[video.c][rk_video_set_frame_rate]:num is 30, den is 1
+[video.c][rk_video_set_frame_rate]:old VI framerate is [-1:-1]
+[video.c][rk_video_set_frame_rate]:new VI framerate is [25:30]
+[video.c][rk_video_set_frame_rate]:new VENC framerate is [30:30]
+RKVencChannel    01:30:43-344 {setH265CuDqp      :4003} pstCuDqp illegal param: u32CuDqp 3159032(expects range [0, 2])
+RKViChn          01:30:43-345 {setFrameRate      :1469} [vi] dev(0) ch(1) illegal param s32SrcFrameRate(25) s32DstFrameRate(30)
+RKVencChannel    01:30:43-346 {setH265CuDqp      :4003} pstCuDqp illegal param: u32CuDqp -6(expects range [0, 2])
+MpiAdapterEncode 01:30:43-347 {ma_encode_create  :1743} ringbuf buf_size 204800
+MpiAdapterEncode 01:30:43-349 {ma_encode_create  :1782} mem_fd = 61
+MpiAdapterEncode 01:30:43-351 {ma_encode_create  :1743} ringbuf buf_size 1048576
+MpiAdapterEncode 01:30:43-356 {ma_encode_create  :1782} mem_fd = 63
+RKViChn          01:30:43-360 {prepareRuntime    :354} ---------------------------------------------------------
+RKViChn          01:30:43-366 {prepareRuntime    :356} vi version: 1.22, name:vvi
+RKViChn          01:30:43-366 {prepareRuntime    :357} rockit-ko version: vmpi:28ee389dbc33
+RKViChn          01:30:43-370 {prepareRuntime    :358} rockit-ko building: -2024-05-24-18:15:06
+RKViChn          01:30:43-370 {prepareRuntime    :359} ---------------------------------------------------------
+cmpi             01:30:43-370 {prepareRuntime    :378} mb pool create success, MBCnt= 2
+RTIsp3x          01:30:43-373 {ispInitDevice     :591} sensor name = m00_b_sc3336 4-0030
+cmpi             01:30:43-375 {createRuntime     :634} >>>>>>>>> Sensor link info dump: <<<<<<<<<
+cmpi             01:30:43-376 {createRuntime     :636} 	 vicap media name           : /dev/media0
+cmpi             01:30:43-376 {createRuntime     :637} 	 vicap model name           : rkcif-mipi-lvds
+cmpi             01:30:43-376 {createRuntime     :638} 	 camera id                  : 0
+cmpi             01:30:43-376 {createRuntime     :639} 	 sensor name                : m00_b_sc3336 4-0030
+cmpi             01:30:43-377 {createRuntime     :641} 	 stream_cif_mipi_id0 video name: /dev/video0
+cmpi             01:30:43-377 {createRuntime     :642} 	 stream_cif_mipi_id1 video name: /dev/video1
+cmpi             01:30:43-377 {createRuntime     :643} 	 stream_cif_mipi_id2 video name: /dev/video2
+cmpi             01:30:43-377 {createRuntime     :644} 	 stream_cif_mipi_id3 video name: /dev/video3
+cmpi             01:30:43-377 {createRuntime     :646} 	 sensor raw width           : 2304
+cmpi             01:30:43-377 {createRuntime     :647} 	 sensor raw height          : 1296
+cmpi             01:30:43-378 {createRuntime     :648} ---------------------------------------------------------
+cmpi             01:30:43-378 {createRuntime     :654} 	 isp media name           : /dev/media1
+cmpi             01:30:43-378 {createRuntime     :655} 	 isp model name           : rkisp0
+cmpi             01:30:43-378 {createRuntime     :656} 	 isp driver name          : rkisp-vir0
+cmpi             01:30:43-378 {createRuntime     :657} 	 isp dev name             : /dev/v4l-subdev3
+cmpi             01:30:43-379 {createRuntime     :659} 	 isp rawrd0_m_path        : /dev/video18
+cmpi             01:30:43-379 {createRuntime     :660} 	 isp rawrd1_l_path        :
+cmpi             01:30:43-379 {createRuntime     :661} 	 isp rawrd2_s_path        : /dev/video19
+cmpi             01:30:43-379 {createRuntime     :664} 	 mainpath video name      : /dev/video11
+cmpi             01:30:43-379 {createRuntime     :665} 	 selfpath video name      : /dev/video12
+cmpi             01:30:43-380 {createRuntime     :666} 	 bypasspath video name    : /dev/video14
+cmpi             01:30:43-380 {createRuntime     :667} 	 sensor link type         : 2
+cmpi             01:30:43-380 {createRuntime     :668} 	 sensor is united         : 0
+cmpi             01:30:43-380 {createRuntime     :672} ---------------------------------------------------------
+cmpi             01:30:43-380 {createRuntime     :711} [non-WRAP MODE]: buff size = 783360
+RTIsp3x          01:30:43-384 {ispInitDevice     :591} sensor name = m00_b_sc3336 4-0030
+RTDeviceV4L2     01:30:43-386 {open              :137} cameraIndex:0, entityName:rkisp_bypasspath
+RTDeviceV4L2     01:30:43-387 {open              :143} open video name(/dev/video14)
+RKViChn          01:30:43-387 {setFrameRate      :1469} [vi] dev(0) ch(2) illegal param s32SrcFrameRate(0) s32DstFrameRate(0)
+RTDeviceV4L2     01:30:43-388 {ispCameraInfo     :567} current device:/dev/video14 isn't compatible(cap:0x84201000) device,memoryType:4, retry:0
+RTDeviceV4L2     01:30:43-389 {ispInitFormat     :767} ioctl VIDIOC_S_FMT OK
+cmpi             01:30:43-389 {start             :1093} =========== vi Start startRuntime ===========
+RTDeviceV4L2     01:30:43-390 {ispStreamOn       :458} do ispStreamOn start
+RTDeviceV4L2     01:30:43-390 {ispStreamOn       :511} do ispStreamOn done
+MpiAdapterEncode 01:30:43-397 {ma_encode_get_pack:2079} map ptr: 0xa3a65000, fd 70
+[DEBUG utils.c:186:rtsp_codec_data_parse_from_user_h265] vps 23
+[DEBUG utils.c:194:rtsp_codec_data_parse_from_user_h265] sps 43
+[DEBUG utils.c:202:rtsp_codec_data_parse_from_user_h265] pps 9
+[storage.c][rkipc_storage_set_dev_attr]:mount path is /userdata, dev_path is /dev/ubi5_0
+[storage.c][rkipc_storage_para_init]:DevAttr set:  AutoDel--1, FreeSizeDel--500~1000, Path--/userdata/video0, Limit--300
+[storage.c][rkipc_storage_para_init]:DevAttr set:  AutoDel--1, FreeSizeDel--500~1000, Path--/userdata/video1, Limit--300
+[storage.c][rkipc_storage_para_init]:DevAttr set:  AutoDel--1, FreeSizeDel--500~1000, Path--/userdata/video2, Limit--300
+[storage.c][rkipc_storage_auto_delete_init]:mountpath:/userdata,devpath:,devtype:,devattr:
+[server.c][rkipc_server_thread]:#Start rkipc_server_thread thread, arg:(nil)
+#Start osd_time_server thread, arg:(nil)
+[osd.c][osd_time_server]:osd_time_id is 1
+[osd.c][osd_time_server]:osd_data.text.font_color is fff799
+[osd.c][osd_time_server]:osd_data.text.format is 24hour CHR-YYYY-MM-DD
+[storage.c][rkipc_storage_file_scan_thread]:/userdata, /dev/ubi5_0, ubifs, rw,relatime,assert=read-only,ubi=5,vol=0
+[storage.c][rkipc_storage_file_scan_thread]:[01:30:43.415439] i is 0, before rkipc_storage_read_file_list
+[storage.c][rkipc_storage_file_scan_thread]:[01:30:43.419130] i is 0, after rkipc_storage_read_file_list
+[storage.c][rkipc_storage_file_scan_thread]:[01:30:43.419736] i is 1, before rkipc_storage_read_file_list
+[storage.c][rkipc_storage_file_scan_thread]:[01:30:43.420400] i is 1, after rkipc_storage_read_file_list
+[storage.c][rkipc_storage_file_scan_thread]:[01:30:43.421143] i is 2, before rkipc_storage_read_file_list
+[storage.c][rkipc_storage_file_scan_thread]:[01:30:43.421757] i is 2, after rkipc_storage_read_file_list
+[storage.c][rkipc_storage_file_scan_thread]:total_size = 2176, free_size = 2136
+cmpi             01:30:43-424 {mb_create_pool    :231} allocated buffer(this=0x1ed868, data=0xa2c54000, size=40960, id=230)
+cmpi             01:30:43-425 {mb_create_pool    :231} allocated buffer(this=0x1edf78, data=0xa2c4a000, size=40960, id=231)
+[storage.c][rkipc_storage_file_monitor_thread]:pHandle->dev_sta.mount_status is 4
+cmpi             01:30:43-430 {attachToChn       :594} The channel attr attach mapid: 0x0.
+cmpi             01:30:43-431 {attachToChn       :594} The channel attr attach mapid: 0x0.
+cmpi             01:30:43-431 {attachToChn       :594} The channel attr attach mapid: 0x0.
+[video.c][rkipc_ivs_get_results]:MD: md_area is 518400, md_area_threshold is 155520
+[video.c][rkipc_ivs_get_results]:MD: md_area is 381952, md_area_threshold is 155520
+[video.c][rkipc_get_jpeg]:RK_MPI_VENC_GetStream timeout a004800e
+[ntp.c][rkipc_ntp_update]:connect error
+[ntp.c][rkipc_ntp_update]:connect error
+[INFO  rtsp_demo.c:408:rtsp_new_client_connection] new rtsp client 172.32.0.100:44758 comming
+[DEBUG rtsp_msg.c:865:rtsp_msg_parse_from_array]
+OPTIONS rtsp://172.32.0.93:554/live/0 RTSP/1.0
+CSeq: 1
+User-Agent: Lavf58.76.100
+
+[DEBUG rtsp_demo.c:725:rtsp_handle_OPTIONS]
+[DEBUG rtsp_msg.c:998:rtsp_msg_build_to_array]
+RTSP/1.0 200 OK
+CSeq: 1
+Date: Tue Jul  1 01:33:21 2025
+Public: OPTIONS, DESCRIBE, SETUP, PLAY, PAUSE, TEARDOWN
+Server: rtsp_demo
+
+[DEBUG rtsp_msg.c:865:rtsp_msg_parse_from_array]
+DESCRIBE rtsp://172.32.0.93:554/live/0 RTSP/1.0
+Accept: application/sdp
+CSeq: 2
+User-Agent: Lavf58.76.100
+
+[DEBUG rtsp_demo.c:746:rtsp_handle_DESCRIBE]
+[DEBUG rtsp_msg.c:998:rtsp_msg_build_to_array]
+RTSP/1.0 200 OK
+CSeq: 2
+Date: Tue Jul  1 01:33:21 2025
+Server: rtsp_demo
+Content-Type: application/sdp
+Content-Length: 479
+
+v=0
+o=- 0 0 IN IP4 0.0.0.0
+s=rtsp_demo
+t=0 0
+a=control:rtsp://172.32.0.93:554/live/0
+a=range:npt=0-
+m=video 0 RTP/AVP 96
+c=IN IP4 0.0.0.0
+a=rtpmap:96 H265/90000
+a=fmtp:96 sprop-vps=QAEMAf//AWAAAAMAgAAAAwAAAwB4vAk=;sprop-sps=QgEBAWAAAAMAgAAAAwAAAwB4oAKAgC0WNvu8pm4CAgIIAAADAAgAAAMAyEA=;sprop-pps=RAHAcoaNQTZA
+a=control:rtsp://172.32.0.93:554/live/0/track1
+m=audio 0 RTP/AVP 97
+c=IN IP4 0.0.0.0
+a=rtpmap:97 PCMA/8000/1
+a=control:rtsp://172.32.0.93:554/live/0/track2
+[DEBUG rtsp_msg.c:865:rtsp_msg_parse_from_array]
+SETUP rtsp://172.32.0.93:554/live/0/track1 RTSP/1.0
+Transport: RTP/AVP/UDP;unicast;client_port=28284-28285
+CSeq: 3
+User-Agent: Lavf58.76.100
+
+[DEBUG rtsp_demo.c:950:rtsp_handle_SETUP]
+[INFO  rtsp_demo.c:907:rtsp_new_rtp_connection] new rtp over udp for video ssrc:22345678 local_port:49152-49153 peer_addr:172.32.0.100 peer_port:28284-28285
+[DEBUG rtsp_msg.c:998:rtsp_msg_build_to_array]
+RTSP/1.0 200 OK
+CSeq: 3
+Date: Tue Jul  1 01:33:21 2025
+Session: 12345678
+Transport: RTP/AVP;ssrc=22345678;unicast;client_port=28284-28285;server_port=49152-49153
+Server: rtsp_demo
+
+[DEBUG rtsp_msg.c:865:rtsp_msg_parse_from_array]
+SETUP rtsp://172.32.0.93:554/live/0/track2 RTSP/1.0
+Transport: RTP/AVP/UDP;unicast;client_port=28286-28287
+CSeq: 4
+User-Agent: Lavf58.76.100
+Session: 12345678
+
+[DEBUG rtsp_demo.c:950:rtsp_handle_SETUP]
+[INFO  rtsp_demo.c:907:rtsp_new_rtp_connection] new rtp over udp for audio ssrc:22345679 local_port:49154-49155 peer_addr:172.32.0.100 peer_port:28286-28287
+[DEBUG rtsp_msg.c:998:rtsp_msg_build_to_array]
+RTSP/1.0 200 OK
+CSeq: 4
+Date: Tue Jul  1 01:33:21 2025
+Session: 12345678
+Transport: RTP/AVP;ssrc=22345679;unicast;client_port=28286-28287;server_port=49154-49155
+Server: rtsp_demo
+
+[DEBUG rtsp_msg.c:865:rtsp_msg_parse_from_array]
+PLAY rtsp://172.32.0.93:554/live/0 RTSP/1.0
+Range: npt=0.000-
+CSeq: 5
+User-Agent: Lavf58.76.100
+Session: 12345678
+
+[DEBUG rtsp_demo.c:1037:rtsp_handle_PLAY]
+[DEBUG rtsp_msg.c:998:rtsp_msg_build_to_array]
+RTSP/1.0 200 OK
+CSeq: 5
+Date: Tue Jul  1 01:33:21 2025
+Session: 12345678
+Server: rtsp_demo
+
+[ntp.c][rkipc_ntp_update]:connect error
+[DEBUG rtsp_msg.c:865:rtsp_msg_parse_from_array]
+OPTIONS rtsp://172.32.0.93:554/live/0 RTSP/1.0
+CSeq: 6
+User-Agent: Lavf58.76.100
+Session: 12345678
+
+[DEBUG rtsp_demo.c:725:rtsp_handle_OPTIONS]
+[DEBUG rtsp_msg.c:998:rtsp_msg_build_to_array]
+RTSP/1.0 200 OK
+CSeq: 6
+Date: Tue Jul  1 01:33:51 2025
+Session: 12345678
+Public: OPTIONS, DESCRIBE, SETUP, PLAY, PAUSE, TEARDOWN
+Server: rtsp_demo
