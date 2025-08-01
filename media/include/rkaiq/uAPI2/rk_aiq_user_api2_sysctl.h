@@ -340,19 +340,6 @@ rk_aiq_uapi2_sysctl_preInit_tb_info(const char* sns_ent_name,
  */
 XCamReturn
 rk_aiq_uapi2_sysctl_preInit_iq_addr(const char* sns_ent_name, void *addr, size_t len);
-
-/**
- * @brief preInit the addr of IQ
- *
- * @param sns_ent_name
- * @param addr
- * @param len
- *
- * @return 0 if no error
- */
-XCamReturn
-rk_aiq_uapi2_sysctl_preInit_iq_addr(const char* sns_ent_name, void *addr, size_t len);
-
 typedef struct rk_aiq_ctx_camInfo_s {
     const char* sns_ent_nm;
     int sns_camPhyId;

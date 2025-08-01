@@ -1434,8 +1434,9 @@ int rk_isp_set_group_ldch_level_form_buffer(int cam_id, void *ldch_0, void *ldch
 	int ret;
 	rk_aiq_camgroup_camInfos_t camInfos;
 	memset(&camInfos, 0, sizeof(camInfos));
-	if (rk_aiq_uapi2_camgroup_getCamInfos(rkipc_aiq_get_ctx(cam_id), &camInfos) !=
-	    XCAM_RETURN_NO_ERROR) {
+	if (rk_aiq_uapi2_camgroup_getCamInfos(
+		(rk_aiq_camgroup_ctx_t*)rkipc_aiq_get_ctx(cam_id),
+		&camInfos) != XCAM_RETURN_NO_ERROR) {
 		LOG_ERROR("rk_aiq_uapi2_camgroup_getCamInfos fail\n");
 		return -1;
 	}
@@ -1444,8 +1445,9 @@ int rk_isp_set_group_ldch_level_form_buffer(int cam_id, void *ldch_0, void *ldch
 		rk_aiq_sys_ctx_t *aiq_ctx = NULL;
 		rk_aiq_ldch_v21_attrib_t ldchAttr;
 		memset(&ldchAttr, 0, sizeof(ldchAttr));
-		aiq_ctx = rk_aiq_uapi2_camgroup_getAiqCtxBySnsNm(rkipc_aiq_get_ctx(cam_id),
-		                                                 camInfos.sns_ent_nm[i]);
+		aiq_ctx = rk_aiq_uapi2_camgroup_getAiqCtxBySnsNm(
+				(rk_aiq_camgroup_ctx_t*)rkipc_aiq_get_ctx(cam_id),
+		        	camInfos.sns_ent_nm[i]);
 		if (!aiq_ctx)
 			continue;
 		LOG_INFO("aiq_ctx sns name: %s, camPhyId %d\n", camInfos.sns_ent_nm[i],
@@ -1741,7 +1743,7 @@ int rk_isp_fastboot_init(int cam_id) {
 	}
 
 	ret = rk_aiq_uapi2_sysctl_preInit_iq_addr(aiq_static_info.sensor_info.sensor_name, vir_iqaddr,
-	                                          (size_t *)file_size);
+	                                          (size_t)file_size);
 	if (ret < 0) {
 		LOG_ERROR("%s: failed to load binary iqfiles\n", aiq_static_info.sensor_info.sensor_name);
 	}
