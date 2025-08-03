@@ -530,82 +530,123 @@ static int rtsp_msg_build_rtp_info(const rtsp_msg_s *msg, char *line, size_t siz
 }
 
 // Generic parser for headers with a single unsigned integer value (e.g., CSeq, Content-Length)
-#define DEFINE_PARSE_BUILD_LIKE_CSEQ(_name, _type, _param, _fmt, _base) \
-static int rtsp_msg_parse_##_name(rtsp_msg_s *msg, const char *line) \
-{ \
-	rtsp_msg_hdr_s *hdrs = &msg->hdrs; \
-	const char *p = strchr(line, ':'); \
-	if (!p) goto fail; \
-	p++; \
-	char *endptr; \
-	uint32_t val = 0; \
-	if (_base == 16) { \
-	  val = strtoul(p, &endptr, _base); \
-	} else { \
-	  long t = strtol(p, &endptr, _base); \
-	  if (t < 0 ) goto fail; \
-	  val = (uint32_t)t; \
-	} \
-	if (p == endptr ) goto fail; \
-	rtsp_mem_free(hdrs->_name); \
-	hdrs->_name = (_type*)rtsp_mem_alloc(sizeof(_type)); \
-	if (!hdrs->_name) { \
-		err("rtsp_mem_alloc for %s failed\n", #_type); \
-		return -1; \
-	} \
-	hdrs->_name->_param = val; \
-	return 0; \
-fail: \
-	err("parse %s failed. line: %s\n", #_name, line); \
-	return -1; \
-} \
-static int rtsp_msg_build_##_name(const rtsp_msg_s *msg, char *line, size_t size) \
-{ \
-	if (msg->hdrs._name) { \
-		return snprintf(line, size, _fmt "\r\n", msg->hdrs._name->_param); \
-	} \
-	return 0; \
+// This avoids code duplication and keeps the code cleaner.
+// It uses a common function to parse and build these headers, reducing redundancy.
+static int rtsp_msg_parse_uint_header(rtsp_msg_s *msg, const char *line, void **hdr_ptr, size_t hdr_size, uint32_t *out_val, int base)
+{
+    const char *p = strchr(line, ':');
+    if (!p) return -1;
+    p++;
+    while (*p == ' ') p++;
+    char *endptr;
+    unsigned long val = strtoul(p, &endptr, base);
+    if (p == endptr || val > UINT32_MAX) return -1;
+    rtsp_mem_free(*hdr_ptr);
+    *hdr_ptr = rtsp_mem_alloc(hdr_size);
+    if (!*hdr_ptr) return -1;
+    *out_val = (uint32_t)val;
+    return 0;
 }
 
-#if 0 // for kunyi debugging
+// cseq
+static int rtsp_msg_parse_cseq(rtsp_msg_s *msg, const char *line)
+{
+    if (!msg) return -1;
+    if (!msg->hdrs.cseq)
+        msg->hdrs.cseq = rtsp_mem_alloc(sizeof(rtsp_msg_cseq_s));
+    if (!msg->hdrs.cseq) return -1;
+    return rtsp_msg_parse_uint_header(msg, line,
+        (void**)&msg->hdrs.cseq,
+        sizeof(rtsp_msg_cseq_s),
+        &msg->hdrs.cseq->cseq,
+        10);
+}
+static int rtsp_msg_build_cseq(const rtsp_msg_s *msg, char *line, size_t size)
+{
+    if (msg->hdrs.cseq)
+        return snprintf(line, size, "CSeq: %u\r\n", msg->hdrs.cseq->cseq);
+    return 0;
+}
+
+// session
 static int rtsp_msg_parse_session(rtsp_msg_s *msg, const char *line)
 {
-	rtsp_msg_hdr_s *hdrs = &msg->hdrs;
-	const char *p = strchr(line, ':');;
-
-	if (!p) goto fail;
-	p++;
-	char *endptr;
-	uint32_t val = strtoul(p, &endptr, 16);
-	if (p == endptr) goto fail;
-
-	rtsp_mem_free(hdrs->session);
-	hdrs->session = (rtsp_msg_session_s*)rtsp_mem_alloc(sizeof(rtsp_msg_session_s));
-	if (!hdrs->session) {
-		err("rtsp_mem_alloc for %s failed\n", "rtsp_msg_session_s");
-		return -1;
-	}
-	hdrs->session->session = val;
-	return 0;
-fail:
-	err("parse %s failed. line: %s\n", "rtsp_msg_session_s", line);
-	return -1;
+    if (!msg) return -1;
+    if (!msg->hdrs.session)
+        msg->hdrs.session = rtsp_mem_alloc(sizeof(rtsp_msg_session_s));
+    if (!msg->hdrs.session) return -1;
+    return rtsp_msg_parse_uint_header(msg, line,
+        (void**)&msg->hdrs.session,
+        sizeof(rtsp_msg_session_s),
+        &msg->hdrs.session->session,
+        16);
 }
-
 static int rtsp_msg_build_session(const rtsp_msg_s *msg, char *line, size_t size)
 {
-	if (msg->hdrs.session) {
-		return snprintf(line, size, "Session: %08X\r\n", msg->hdrs.session->session); \
-	}
-	return 0;
+    if (msg->hdrs.session)
+        return snprintf(line, size, "Session: %08X\r\n", msg->hdrs.session->session);
+    return 0;
 }
-#endif
 
-DEFINE_PARSE_BUILD_LIKE_CSEQ(cseq, rtsp_msg_cseq_s, cseq, "CSeq: %u", 10)
-DEFINE_PARSE_BUILD_LIKE_CSEQ(session, rtsp_msg_session_s, session, "Session: %08X", 16)
-DEFINE_PARSE_BUILD_LIKE_CSEQ(content_length, rtsp_msg_content_length_s, length, "Content-Length: %u", 10)
-DEFINE_PARSE_BUILD_LIKE_CSEQ(x_accept_dynamic_rate, rtsp_msg_x_accept_dynamic_rate, x_accept_dynamic_rate, "x-accept-dynamic-Rate: %u", 10)
-DEFINE_PARSE_BUILD_LIKE_CSEQ(x_dynamic_rate, rtsp_msg_x_dynamic_rate, x_dynamic_rate, "x-dynamic-rate: %u", 10)
+// content_length
+static int rtsp_msg_parse_content_length(rtsp_msg_s *msg, const char *line)
+{
+    if (!msg) return -1;
+    if (!msg->hdrs.content_length)
+        msg->hdrs.content_length = rtsp_mem_alloc(sizeof(rtsp_msg_content_length_s));
+    if (!msg->hdrs.content_length) return -1;
+    return rtsp_msg_parse_uint_header(msg, line,
+        (void**)&msg->hdrs.content_length,
+        sizeof(rtsp_msg_content_length_s),
+        &msg->hdrs.content_length->length,
+        10);
+}
+static int rtsp_msg_build_content_length(const rtsp_msg_s *msg, char *line, size_t size)
+{
+    if (msg->hdrs.content_length)
+        return snprintf(line, size, "Content-Length: %u\r\n", msg->hdrs.content_length->length);
+    return 0;
+}
+
+// x_accept_dynamic_rate
+static int rtsp_msg_parse_x_accept_dynamic_rate(rtsp_msg_s *msg, const char *line)
+{
+    if (!msg) return -1;
+    if (!msg->hdrs.x_accept_dynamic_rate)
+        msg->hdrs.x_accept_dynamic_rate = rtsp_mem_alloc(sizeof(rtsp_msg_x_accept_dynamic_rate));
+    if (!msg->hdrs.x_accept_dynamic_rate) return -1;
+    return rtsp_msg_parse_uint_header(msg, line,
+        (void**)&msg->hdrs.x_accept_dynamic_rate,
+        sizeof(rtsp_msg_x_accept_dynamic_rate),
+        &msg->hdrs.x_accept_dynamic_rate->x_accept_dynamic_rate,
+        10);
+}
+static int rtsp_msg_build_x_accept_dynamic_rate(const rtsp_msg_s *msg, char *line, size_t size)
+{
+    if (msg->hdrs.x_accept_dynamic_rate)
+        return snprintf(line, size, "x-accept-dynamic-Rate: %u\r\n", msg->hdrs.x_accept_dynamic_rate->x_accept_dynamic_rate);
+    return 0;
+}
+
+// x_dynamic_rate
+static int rtsp_msg_parse_x_dynamic_rate(rtsp_msg_s *msg, const char *line)
+{
+    if (!msg) return -1;
+    if (!msg->hdrs.x_dynamic_rate)
+        msg->hdrs.x_dynamic_rate = rtsp_mem_alloc(sizeof(rtsp_msg_x_dynamic_rate));
+    if (!msg->hdrs.x_dynamic_rate) return -1;
+    return rtsp_msg_parse_uint_header(msg, line,
+        (void**)&msg->hdrs.x_dynamic_rate,
+        sizeof(rtsp_msg_x_dynamic_rate),
+        &msg->hdrs.x_dynamic_rate->x_dynamic_rate,
+        10);
+}
+static int rtsp_msg_build_x_dynamic_rate(const rtsp_msg_s *msg, char *line, size_t size)
+{
+    if (msg->hdrs.x_dynamic_rate)
+        return snprintf(line, size, "x-dynamic-rate: %u\r\n", msg->hdrs.x_dynamic_rate->x_dynamic_rate);
+    return 0;
+}
 
 // Generic parser for headers with a string value (e.g., Server, User-Agent)
 #define DEFINE_PARSE_BUILD_LIKE_SERVER(_name, _type, _param, _fmt) \
