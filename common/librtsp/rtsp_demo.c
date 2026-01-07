@@ -165,31 +165,6 @@ struct rtsp_client_connection
 	TAILQ_ENTRY(rtsp_client_connection) session_entry;
 };
 
-#define RTSP_CC_IDLE_TIMEOUT_US (120000000ULL)
-
-static void rtsp_cleanup_idle_connections(struct rtsp_demo *d, uint64_t now_us)
-{
-	struct rtsp_client_connection *cc;
-
-	if (!d)
-		return;
-
-	cc = TAILQ_FIRST(&d->connections_qhead);
-	while (cc) {
-		struct rtsp_client_connection *cc1 = cc;
-		uint64_t last_us;
-		cc = TAILQ_NEXT(cc, demo_entry);
-
-		last_us = (cc1->last_rx_us > cc1->last_tx_us) ? cc1->last_rx_us : cc1->last_tx_us;
-		if (last_us && now_us > last_us && (now_us - last_us) > RTSP_CC_IDLE_TIMEOUT_US) {
-			warn("delete idle client [peer %s:%u], idle %llu us\n",
-					inet_ntoa(cc1->peer_addr), cc1->peer_port,
-					(unsigned long long)(now_us - last_us));
-			rtsp_del_client_connection(cc1);
-		}
-	}
-}
-
 struct rtsp_demo
 {
 	SOCKET sockfd;	//rtsp server socket 0:invalid
@@ -485,6 +460,31 @@ static void rtsp_del_client_connection (struct rtsp_client_connection *cc)
 		rtsp_del_rtp_connection(cc, 1);
 		closesocket(cc->sockfd);
 		__free_client_connection(cc);
+	}
+}
+
+#define RTSP_CC_IDLE_TIMEOUT_US (120ULL * 1000ULL *1000ULL) // 120s 
+								
+static void rtsp_cleanup_idle_connections(struct rtsp_demo *d, uint64_t now_us)
+{
+	struct rtsp_client_connection *cc;
+
+	if (!d)
+		return;
+
+	cc = TAILQ_FIRST(&d->connections_qhead);
+	while (cc) {
+		struct rtsp_client_connection *cc1 = cc;
+		uint64_t last_us;
+		cc = TAILQ_NEXT(cc, demo_entry);
+
+		last_us = (cc1->last_rx_us > cc1->last_tx_us) ? cc1->last_rx_us : cc1->last_tx_us;
+		if (last_us && now_us > last_us && (now_us - last_us) > RTSP_CC_IDLE_TIMEOUT_US) {
+			warn("delete idle client [peer %s:%u], idle %llu us\n",
+					inet_ntoa(cc1->peer_addr), cc1->peer_port,
+					(unsigned long long)(now_us - last_us));
+			rtsp_del_client_connection(cc1);
+		}
 	}
 }
 
