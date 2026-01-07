@@ -1662,7 +1662,11 @@ static int rtsp_try_tx_rtcp_sr (struct rtsp_client_connection *cc, int isaudio, 
 	return size;
 }
 
-int rtsp_do_event (rtsp_demo_handle demo)
+int rtsp_do_event (rtsp_demo_handle demo) {
+	return rtsp_do_event_timeout(demo, 10);
+}
+
+int rtsp_do_event_timeout (rtsp_demo_handle demo, int timeout_ms)
 {
 	struct rtsp_demo *d = (struct rtsp_demo*)demo;
 	struct rtsp_client_connection *cc = NULL;
@@ -1739,7 +1743,7 @@ int rtsp_do_event (rtsp_demo_handle demo)
 
 	memset(&tv, 0, sizeof(tv));
 	tv.tv_sec = 0;
-	tv.tv_usec = 0;
+	tv.tv_usec = timeout_ms * 1000;
 
 	ret = select(maxfd + 1, &rfds, &wfds, NULL, &tv);
 	if (ret < 0) {

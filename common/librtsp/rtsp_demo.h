@@ -41,7 +41,10 @@ typedef void * rtsp_demo_handle;
 typedef void * rtsp_session_handle;
 
 rtsp_demo_handle create_rtsp_demo (int port);
+
 int rtsp_do_event (rtsp_demo_handle demo);
+int rtsp_do_event_timeout (rtsp_demo_handle demo, int timeout_ms);
+
 rtsp_session_handle rtsp_new_session (rtsp_demo_handle demo, const char *path);
 int rtsp_set_auth (rtsp_session_handle session, int type, const char *user, const char *passwd);
 int rtsp_set_video (rtsp_session_handle session, int codec_id, const uint8_t *codec_data, int data_len);
