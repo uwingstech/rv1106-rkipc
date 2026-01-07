@@ -12,29 +12,21 @@
 #include "comm.h"
 #include "rtp_enc.h"
 
-struct rtphdr
-{
-#ifdef __BIG_ENDIAN__
-	uint16_t v:2;
-	uint16_t p:1;
-	uint16_t x:1;
-	uint16_t cc:4;
-	uint16_t m:1;
-	uint16_t pt:7;
-#else
-	uint16_t cc:4;
-	uint16_t x:1;
-	uint16_t p:1;
-	uint16_t v:2;
-	uint16_t pt:7;
-	uint16_t m:1;
-#endif
-	uint16_t seq;
-	uint32_t ts;
-	uint32_t ssrc;
-};
-
 #define RTPHDR_SIZE (12)
+
+static inline void rtp_write_header(uint8_t *p, int marker, uint8_t pt,
+                                    uint16_t seq, uint32_t ts, uint32_t ssrc)
+{
+    p[0] = 0x80; // V=2,P=0,X=0,CC=0
+    p[1] = (uint8_t)((marker ? 0x80 : 0x00) | (pt & 0x7F));
+    uint16_t nseq = htons(seq);
+    uint32_t nts  = htonl(ts);
+    uint32_t nssrc = htonl(ssrc);
+    memcpy(p + 2, &nseq, 2);
+    memcpy(p + 4, &nts, 4);
+    memcpy(p + 8, &nssrc, 4);
+}
+
 
 int rtp_enc_h264 (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_t *packets[], int pktsizs[])
 {
@@ -59,20 +51,13 @@ int rtp_enc_h264 (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_
 	rtp_ts = (uint32_t)(ts * e->sample_rate / 1000000);
 
 	while (len > 0 && packets[count] && pktsizs[count] > RTPHDR_SIZE) {
-		struct rtphdr *hdr = (struct rtphdr*)packets[count];
 		int pktsiz = pktsizs[count];
-		hdr->v = 2;
-		hdr->p = 0;
-		hdr->x = 0;
-		hdr->cc = 0;
-		hdr->m = 0;
-		hdr->pt = e->pt;
-		hdr->seq = htons(e->seq++);
-		hdr->ts = htonl(rtp_ts);
-		hdr->ssrc = htonl(e->ssrc);
+		int marker = 0;
+		uint16_t seq = e->seq++;
 
 		if (count == 0 && len <= pktsiz - RTPHDR_SIZE) {
-			hdr->m = 1;
+			marker = 1;
+			rtp_write_header(packets[count], marker, e->pt, seq, rtp_ts, e->ssrc);
 			memcpy(packets[count] + RTPHDR_SIZE, frame, len);
 			pktsizs[count] = RTPHDR_SIZE + len;
 			frame += len;
@@ -85,7 +70,8 @@ int rtp_enc_h264 (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_
 			} else if (len <= pktsiz - RTPHDR_SIZE - 2) {
 				mark = 1;
 			}
-			hdr->m = mark;
+			marker = mark;
+			rtp_write_header(packets[count], marker, e->pt, seq, rtp_ts, e->ssrc);
 
 			packets[count][RTPHDR_SIZE + 0] = (nalhdr & 0xe0) | 28;//FU-A
 			packets[count][RTPHDR_SIZE + 1] = (nalhdr & 0x1f);//FU-A
@@ -135,20 +121,13 @@ int rtp_enc_h265 (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_
 	rtp_ts = (uint32_t)(ts * e->sample_rate / 1000000);
 
 	while (len > 0 && packets[count] && pktsizs[count] > RTPHDR_SIZE) {
-		struct rtphdr *hdr = (struct rtphdr*)packets[count];
 		int pktsiz = pktsizs[count];
-		hdr->v = 2;
-		hdr->p = 0;
-		hdr->x = 0;
-		hdr->cc = 0;
-		hdr->m = 0;
-		hdr->pt = e->pt;
-		hdr->seq = htons(e->seq++);
-		hdr->ts = htonl(rtp_ts);
-		hdr->ssrc = htonl(e->ssrc);
+		int marker = 0;
+		uint16_t seq = e->seq++;
 
 		if (count == 0 && len <= pktsiz - RTPHDR_SIZE) {
-			hdr->m = 1;
+			marker = 1;
+			rtp_write_header(packets[count], marker, e->pt, seq, rtp_ts, e->ssrc);
 			memcpy(packets[count] + RTPHDR_SIZE, frame, len);
 			pktsizs[count] = RTPHDR_SIZE + len;
 			frame += len;
@@ -161,7 +140,8 @@ int rtp_enc_h265 (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_
 			} else if (len <= pktsiz - RTPHDR_SIZE - 3) {
 				mark = 1;
 			}
-			hdr->m = mark;
+			marker = mark;
+			rtp_write_header(packets[count], marker, e->pt, seq, rtp_ts, e->ssrc);
 
 			packets[count][RTPHDR_SIZE + 0] = (nalhdr[0] & 0x81) | (49 << 1);//FU-A
 			packets[count][RTPHDR_SIZE + 1] = (nalhdr[1]);
@@ -207,17 +187,9 @@ int rtp_enc_aac (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_t
 	au_len = len;
 
 	while (len > 0 && packets[count] && pktsizs[count] > RTPHDR_SIZE + 4) {
-		struct rtphdr *hdr = (struct rtphdr*)packets[count];
 		int pktsiz = pktsizs[count];
-		hdr->v = 2;
-		hdr->p = 0;
-		hdr->x = 0;
-		hdr->cc = 0;
-		hdr->m = 0;
-		hdr->pt = e->pt;
-		hdr->seq = htons(e->seq++);
-		hdr->ts  = htonl(rtp_ts);
-		hdr->ssrc = htonl(e->ssrc);
+		int marker = 0;
+		uint16_t seq = e->seq++;
 
 		packets[count][RTPHDR_SIZE+0] = 0x00;
 		packets[count][RTPHDR_SIZE+1] = 0x10;
@@ -225,12 +197,14 @@ int rtp_enc_aac (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_t
 		packets[count][RTPHDR_SIZE+3] = (au_len & 0x1f) << 3;
 
 		if (len <= pktsiz - RTPHDR_SIZE - 4) {
-			hdr->m = 1;
+			marker = 1;
+			rtp_write_header(packets[count], marker, e->pt, seq, rtp_ts, e->ssrc);
 			memcpy(packets[count] + RTPHDR_SIZE + 4, frame, len);
 			pktsizs[count] = RTPHDR_SIZE + 4 + len;
 			frame += len;
 			len -= len;
 		} else {
+			rtp_write_header(packets[count], marker, e->pt, seq, rtp_ts, e->ssrc);
 			memcpy(packets[count] + RTPHDR_SIZE + 4, frame, pktsiz - RTPHDR_SIZE - 4);
 			pktsizs[count] = pktsiz;
 			frame += pktsiz - RTPHDR_SIZE - 4;
@@ -252,17 +226,10 @@ int rtp_enc_g711 (rtp_enc *e, const uint8_t *frame, int len, uint64_t ts, uint8_
 
 	rtp_ts = (uint32_t)(ts * e->sample_rate / 1000000);
 	while (len > 0 && packets[count] && pktsizs[count] > RTPHDR_SIZE) {
-		struct rtphdr *hdr = (struct rtphdr*)packets[count];
 		int pktsiz = pktsizs[count];
-		hdr->v = 2;
-		hdr->p = 0;
-		hdr->x = 0;
-		hdr->cc = 0;
-		hdr->m = (e->seq == 0);
-		hdr->pt = e->pt;
-		hdr->seq = htons(e->seq++);
-		hdr->ts  = htonl(rtp_ts);
-		hdr->ssrc = htonl(e->ssrc);
+		int marker = (e->seq == 0);
+		uint16_t seq = e->seq++;
+		rtp_write_header(packets[count], marker, e->pt, seq, rtp_ts, e->ssrc);
 
 		if (len <= pktsiz - RTPHDR_SIZE) {
 			memcpy(packets[count] + RTPHDR_SIZE, frame, len);
