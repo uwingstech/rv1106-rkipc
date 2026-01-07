@@ -606,13 +606,17 @@ int rtsp_set_video (rtsp_session_handle session, int codec_id, const uint8_t *co
 		case RTSP_CODEC_ID_VIDEO_H264:
 			if (rtsp_codec_data_parse_from_user_h264(codec_data, data_len, &s->vcodec_data.h264) <= 0) {
 				warn("parse codec_data failed\n");
-				break;
+				s->vcodec_id = RTSP_CODEC_ID_NONE;
+				memset(&s->vcodec_data, 0, sizeof(s->vcodec_data));
+				return -1;
 			}
 			break;
 		case RTSP_CODEC_ID_VIDEO_H265:
 			if (rtsp_codec_data_parse_from_user_h265(codec_data, data_len, &s->vcodec_data.h265) <= 0) {
 				warn("parse codec_data failed\n");
-				break;
+				s->vcodec_id = RTSP_CODEC_ID_NONE;
+				memset(&s->vcodec_data, 0, sizeof(s->vcodec_data));
+				return -1;
 			}
 			break;
 		}
@@ -660,13 +664,17 @@ int rtsp_set_audio (rtsp_session_handle session, int codec_id, const uint8_t *co
 		case RTSP_CODEC_ID_AUDIO_G726:
 			if (rtsp_codec_data_parse_from_user_g726(codec_data, data_len, &s->acodec_data.g726) <= 0) {
 				warn("parse codec_data failed\n");
-				break;
+				s->acodec_id = RTSP_CODEC_ID_NONE;
+				memset(&s->acodec_data, 0, sizeof(s->acodec_data));
+				return -1;
 			}
 			break;
 		case RTSP_CODEC_ID_AUDIO_AAC:
 			if (rtsp_codec_data_parse_from_user_aac(codec_data, data_len, &s->acodec_data.aac) <= 0) {
 				warn("parse codec_data failed\n");
-				break;
+				s->acodec_id = RTSP_CODEC_ID_NONE;
+				memset(&s->acodec_data, 0, sizeof(s->acodec_data));
+				return -1;
 			}
 			s->artpe.sample_rate = s->acodec_data.aac.sample_rate;
 			break;
@@ -1938,7 +1946,7 @@ int rtsp_tx_video (rtsp_session_handle session, const uint8_t *frame, int len, u
 	int *pktlens[VRTP_MAX_NBPKTS] = {NULL};
 	int i, index, count, start;
 
-	if (!s || !frame || s->vcodec_id == RTSP_CODEC_ID_NONE)
+	if (!s || !frame || len <= 0 || s->vcodec_id == RTSP_CODEC_ID_NONE)
 		return -1;
 
 	//XXX guess request the number of rtp packet for this frame. +4 for SPS+PPS+VPS+SEI+I frame
@@ -2054,7 +2062,7 @@ int rtsp_tx_audio (rtsp_session_handle session, const uint8_t *frame, int len, u
 	int *pktlens[ARTP_MAX_NBPKTS] = {NULL};
 	int i, index, count;
 
-	if (!s || !frame || s->acodec_id == RTSP_CODEC_ID_NONE)
+	if (!s || !frame || len <= 0 || s->acodec_id == RTSP_CODEC_ID_NONE)
 		return -1;
 
 	//XXX guess request the number of rtp packet for this frame
