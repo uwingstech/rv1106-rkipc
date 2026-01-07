@@ -11,6 +11,11 @@
 #include <errno.h>
 #include <stdint.h>
 
+#ifdef __LINUX__
+#include <time.h>
+#include <sys/time.h>
+#endif
+
 #include "comm.h"
 #include "rtsp_demo.h"
 #include "rtsp_msg.h"
@@ -123,7 +128,7 @@ struct rtp_connection
 #define RTSP_REQBUF_MAX_SIZ	 (1024)
 //#define RTSP_RESBUF_MAX_SIZ	 (1024)
 #if (RTP_MAX_PKTSIZ+4 < RTSP_REQBUF_MAX_SIZ)
-  #define RTSP_RESBUF_MAX_SIZ   (RTSP_REQ_BUF_MAX_SIZ)
+  #define RTSP_RESBUF_MAX_SIZ   (RTSP_REQBUF_MAX_SIZ)
 #else
   #define RTSP_RESBUF_MAX_SIZ   (RTP_MAX_PKTSIZ+4)
 #endif
@@ -135,6 +140,9 @@ struct rtsp_client_connection
 #define RTSP_CC_STATE_READY		1
 #define RTSP_CC_STATE_PLAYING	2
 #define RTSP_CC_STATE_RECORDING	3
+
+	uint64_t	last_rx_us;
+	uint64_t	last_tx_us;
 
 	SOCKET		sockfd;		//rtsp client socket
 	struct in_addr	peer_addr;	//peer ipv4 addr
@@ -156,6 +164,31 @@ struct rtsp_client_connection
 	TAILQ_ENTRY(rtsp_client_connection) demo_entry;
 	TAILQ_ENTRY(rtsp_client_connection) session_entry;
 };
+
+#define RTSP_CC_IDLE_TIMEOUT_US (120000000ULL)
+
+static void rtsp_cleanup_idle_connections(struct rtsp_demo *d, uint64_t now_us)
+{
+	struct rtsp_client_connection *cc;
+
+	if (!d)
+		return;
+
+	cc = TAILQ_FIRST(&d->connections_qhead);
+	while (cc) {
+		struct rtsp_client_connection *cc1 = cc;
+		uint64_t last_us;
+		cc = TAILQ_NEXT(cc, demo_entry);
+
+		last_us = (cc1->last_rx_us > cc1->last_tx_us) ? cc1->last_rx_us : cc1->last_tx_us;
+		if (last_us && now_us > last_us && (now_us - last_us) > RTSP_CC_IDLE_TIMEOUT_US) {
+			warn("delete idle client [peer %s:%u], idle %llu us\n",
+					inet_ntoa(cc1->peer_addr), cc1->peer_port,
+					(unsigned long long)(now_us - last_us));
+			rtsp_del_client_connection(cc1);
+		}
+	}
+}
 
 struct rtsp_demo
 {
@@ -412,6 +445,7 @@ static struct rtsp_client_connection *rtsp_new_client_connection (struct rtsp_de
 	struct sockaddr_in inaddr;
 	SOCKET sockfd;
 	SOCKLEN addrlen = sizeof(inaddr);
+	uint64_t now_us;
 
 	sockfd = accept(d->sockfd, (struct sockaddr*)&inaddr, &addrlen);
 	if (sockfd == INVALID_SOCKET) {
@@ -434,6 +468,9 @@ static struct rtsp_client_connection *rtsp_new_client_connection (struct rtsp_de
 	cc->sockfd = sockfd;
 	cc->peer_addr = inaddr.sin_addr;
 	cc->peer_port = ntohs(inaddr.sin_port);
+	now_us = rtsp_get_reltime();
+	cc->last_rx_us = now_us;
+	cc->last_tx_us = now_us;
 
 	return cc;
 }
@@ -824,6 +861,8 @@ static int rtsp_handle_DESCRIBE (struct rtsp_client_connection *cc, const rtsp_m
 		return 0;
 	}
 
+	cc->last_tx_us = rtsp_get_reltime();
+
 	//build uri
 	sprintf(uri, "rtsp://%s", puri->ipaddr);
 	if (puri->port != 0)
@@ -1042,6 +1081,7 @@ static int rtsp_handle_SETUP (struct rtsp_client_connection *cc, const rtsp_msg_
 			return 0;
 		}
 	}
+	cc->last_tx_us = rtsp_get_reltime();
 
 	snprintf(vpath, sizeof(vpath) - 1, "%s/%s", s->path, VRTSP_SUBPATH);
 	snprintf(apath, sizeof(vpath) - 1, "%s/%s", s->path, ARTSP_SUBPATH);
@@ -1266,6 +1306,9 @@ static int rtsp_recv_msg (struct rtsp_client_connection *cc, rtsp_msg_s *msg)
 		}
 		cc->reqlen += ret;
 		cc->reqbuf[cc->reqlen] = 0;
+		if (ret > 0) {
+			cc->last_rx_us = rtsp_get_reltime();
+		}
 	}
 
 	if (cc->reqlen == 0) {
@@ -1285,6 +1328,7 @@ static int rtsp_recv_msg (struct rtsp_client_connection *cc, rtsp_msg_s *msg)
 
 	memmove(cc->reqbuf, cc->reqbuf + ret, cc->reqlen - ret);
 	cc->reqlen -= ret;
+	cc->last_rx_us = rtsp_get_reltime();
 	return ret;
 }
 
@@ -1296,6 +1340,7 @@ static int rtsp_send_msg (struct rtsp_client_connection *cc, rtsp_msg_s *msg)
 		ret = send(cc->sockfd, cc->resbuf + cc->resoff, cc->reslen, 0);
 		if (ret != cc->reslen) {
 			if (ret > 0 && ret < cc->reslen) {
+				cc->last_tx_us = rtsp_get_reltime();
 				cc->resoff += ret;
 				cc->reslen -= ret;
 				warn("rtsp send message failed, buffer has %d bytes. [peer %s:%u]\n",
@@ -1308,6 +1353,9 @@ static int rtsp_send_msg (struct rtsp_client_connection *cc, rtsp_msg_s *msg)
 				return -1;
 			}
 			return 0;
+		}
+		if (ret > 0) {
+			cc->last_tx_us = rtsp_get_reltime();
 		}
 		cc->resoff = 0;
 		cc->reslen = 0;
@@ -1322,6 +1370,7 @@ static int rtsp_send_msg (struct rtsp_client_connection *cc, rtsp_msg_s *msg)
 	ret = send(cc->sockfd, cc->resbuf, size, 0);
 	if (ret != size) {
 		if (ret > 0 && ret < size) {
+			cc->last_tx_us = rtsp_get_reltime();
 			cc->resoff = ret;
 			cc->reslen = size - ret;
 			dbg("rtsp send message %d bytes, store %d bytes to buffer. [peer %s:%u]\n",
@@ -1349,6 +1398,7 @@ static int rtsp_send_interlaced_frame (struct rtsp_client_connection *cc, int ch
 		ret = send(cc->sockfd, cc->resbuf + cc->resoff, cc->reslen, 0);
 		if (ret != cc->reslen) {
 			if (ret > 0 && ret < cc->reslen) {
+				cc->last_tx_us = rtsp_get_reltime();
 				cc->resoff += ret;
 				cc->reslen -= ret;
 				warn("rtsp send interlaced frame failed, buffer has %d bytes. [peer %s:%u]\n",
@@ -1376,10 +1426,14 @@ static int rtsp_send_interlaced_frame (struct rtsp_client_connection *cc, int ch
 	//XXX one times to send a complete interlaced frame
 	szbuf[0] = '$';
 	szbuf[1] = channel;
-	*((uint16_t*)&szbuf[2]) = htons(len);
+	{
+		uint16_t net_len = htons(len);
+		memcpy(&szbuf[2], &net_len, sizeof(net_len));
+	}
 	ret = send(cc->sockfd, (const char*)szbuf, 4, 0);
 	if (ret != 4) {
 		if (ret > 0 && ret < 4) {
+			cc->last_tx_us = rtsp_get_reltime();
 			cc->resoff = 0;
 			cc->reslen = 4 - ret + len;
 			memcpy(cc->resbuf, szbuf + ret, 4 - ret);
@@ -1399,6 +1453,7 @@ static int rtsp_send_interlaced_frame (struct rtsp_client_connection *cc, int ch
 	ret = send(cc->sockfd, (const char*)data, len, 0);
 	if (ret != len) {
 		if (ret > 0 && ret < len) {
+			cc->last_tx_us = rtsp_get_reltime();
 			cc->resoff = 0;
 			cc->reslen = len - ret;
 			memcpy(cc->resbuf, data + ret, len - ret);
@@ -1433,6 +1488,8 @@ static int rtsp_recv_rtp_over_udp (struct rtsp_client_connection *cc, int isaudi
 		return 0;
 	}
 
+	cc->last_rx_us = rtsp_get_reltime();
+
 	//dbg("rtp over udp recv %d bytes [peer %s:%u]\n", len, inet_ntoa(cc->peer_addr), cc->peer_port);
 
 	if (!memcmp(&inaddr.sin_addr, &rtp->peer_addr, sizeof(inaddr.sin_addr))
@@ -1463,6 +1520,8 @@ static int rtsp_recv_rtcp_over_udp (struct rtsp_client_connection *cc, int isaud
 		}
 		return 0;
 	}
+
+	cc->last_rx_us = rtsp_get_reltime();
 
 	//dbg("rtcp over udp recv %d bytes [peer %s:%u]\n", len, inet_ntoa(cc->peer_addr), cc->peer_port);
 
@@ -1530,6 +1589,7 @@ static int rtsp_tx_video_packet (struct rtsp_client_connection *cc)
 					break;
 				}
 			}
+			cc->last_tx_us = rtsp_get_reltime();
 
 			rtp->rtcp_packet_count ++;
 			rtp->rtcp_octet_count += *ppktlen - 12;//XXX
@@ -1657,6 +1717,7 @@ static int rtsp_try_tx_rtcp_sr (struct rtsp_client_connection *cc, int isaudio, 
 			return 0;
 		}
 	}
+	cc->last_tx_us = rtsp_get_reltime();
 
 	rtp->rtcp_last_ts = ts;
 	return size;
@@ -1751,6 +1812,7 @@ int rtsp_do_event_timeout (rtsp_demo_handle demo, int timeout_ms)
 		return -1;
 	}
 	if (ret == 0) {
+		rtsp_cleanup_idle_connections(d, rtsp_get_reltime());
 		return 0;
 	}
 
@@ -1853,6 +1915,8 @@ int rtsp_do_event_timeout (rtsp_demo_handle demo, int timeout_ms)
 			}
 		}
 	}
+
+	rtsp_cleanup_idle_connections(d, rtsp_get_reltime());
 
 	return 1;
 }
@@ -2072,8 +2136,13 @@ uint64_t rtsp_get_reltime (void)
 #endif
 #ifdef __LINUX__
 	struct timespec tp;
-	clock_gettime(CLOCK_MONOTONIC, &tp);
-	return (tp.tv_sec * 1000000ULL + tp.tv_nsec / 1000ULL);
+	if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0) {
+		return (tp.tv_sec * 1000000ULL + tp.tv_nsec / 1000ULL);
+	} else {
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		return (tv.tv_sec * 1000000ULL + tv.tv_usec);
+	}
 #endif
 }
 
