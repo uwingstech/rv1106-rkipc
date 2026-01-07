@@ -689,12 +689,19 @@ int rtsp_set_audio (rtsp_session_handle session, int codec_id, const uint8_t *co
 int rtsp_set_audio_sample_rate (rtsp_session_handle session, int sample_rate)
 {
 	struct rtsp_session *s = (struct rtsp_session*)session;
+	if (!s || sample_rate <= 0)
+		return -1;
 	s->artpe.sample_rate = sample_rate;
+	return 0;
 }
 
 int rtsp_set_audio_channels (rtsp_session_handle session, int channels)
 {
 	struct rtsp_session *s = (struct rtsp_session*)session;
+	if (!s || channels <= 0)
+		return -1;
+	(void)channels;
+	return 0;
 }
 
 void rtsp_del_session (rtsp_session_handle session)
